@@ -1,0 +1,42 @@
+services:
+  # Integration Server
+  # https://docs.webmethods.io/on-premises/webmethods-integration-server/en/11.1.0/webhelp/pie-webhelp/to-sag_environment_variables_2.html
+  is:
+    # image: cp.icr.io/cp/webmethods/integration/webmethods-integrationserver:11.1
+    # image: cp.icr.io/cp/webmethods/integration/webmethods-microservicesruntime:11.1
+    image: wm-edge-runtime:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - BASE_IMAGE=ibmwebmethods.azurecr.io/webmethods-edge-runtime:11.0.10
+        - WPM_TOKEN
+    hostname: is
+    ports:
+      - "5555:5555"
+      - "5543:5543"
+    environment:
+      - JAVA_MIN_MEM=512m
+      - JAVA_MAX_MEM=512m
+      - SAG_IS_ADMIN_PASSWORD=manage
+      - SAG_IS_DEBUG_LEVEL=Info
+    volumes:
+      - './application.properties:/opt/softwareag/IntegrationServer/application.properties'
+    stop_grace_period: 30s
+
+  # Universal Messaging
+  # https://docs.webmethods.io/on-premises/webmethods-universal-messaging/en/11.1.0/webhelp/num-webhelp/co-ops_running_um_docker_image.html
+  um:
+    image: cp.icr.io/cp/webmethods/universalmessaging/universalmessaging-server:11.1
+    ports:
+      - "9000:9000"
+    hostname: um
+    environment:
+      - INIT_JAVA_MEM_SIZE=512
+      - MAX_JAVA_MEM_SIZE=512
+    volumes:
+      - 'um-data:/opt/softwareag/UniversalMessaging/server/default/data'
+    stop_grace_period: 30s
+
+volumes:
+  um-data:
