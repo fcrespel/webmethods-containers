@@ -1,15 +1,15 @@
 services:
   # Integration Server
-  # https://docs.webmethods.io/on-premises/webmethods-integration-server/en/11.1.0/webhelp/pie-webhelp/to-sag_environment_variables_2.html
+  # https://www.ibm.com/docs/en/wm-integration-server/11.1.0?topic=guide-environment-variables
   is:
-    # image: cp.icr.io/cp/webmethods/integration/webmethods-integrationserver:11.1
     # image: cp.icr.io/cp/webmethods/integration/webmethods-microservicesruntime:11.1
-    image: wm-edge-runtime:latest
+    # image: ibmwebmethods.azurecr.io/webmethods-microservicesruntime:11.1
+    image: webmethods-microservicesruntime:11.1
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        - BASE_IMAGE=ibmwebmethods.azurecr.io/webmethods-edge-runtime:11.0.10
+        - BASE_IMAGE=ibmwebmethods.azurecr.io/webmethods-microservicesruntime:11.1
         - WPM_TOKEN
     hostname: is
     ports:
@@ -25,12 +25,13 @@ services:
     stop_grace_period: 30s
 
   # Universal Messaging
-  # https://docs.webmethods.io/on-premises/webmethods-universal-messaging/en/11.1.0/webhelp/num-webhelp/co-ops_running_um_docker_image.html
+  # https://www.ibm.com/docs/en/wm-universal-messaging/11.1.0?topic=containers-running-universal-messaging
   um:
-    image: cp.icr.io/cp/webmethods/universalmessaging/universalmessaging-server:11.1
+    # image: cp.icr.io/cp/webmethods/universalmessaging/universalmessaging-server:11.1
+    image: ibmwebmethods.azurecr.io/universalmessaging-server:11.1
+    hostname: um
     ports:
       - "9000:9000"
-    hostname: um
     environment:
       - INIT_JAVA_MEM_SIZE=512
       - MAX_JAVA_MEM_SIZE=512
