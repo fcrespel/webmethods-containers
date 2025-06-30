@@ -39,5 +39,68 @@ services:
       - 'um-data:/opt/softwareag/UniversalMessaging/server/default/data'
     stop_grace_period: 30s
 
+  # API Gateway
+  # https://www.ibm.com/docs/en/wm-api-gateway/11.1.0?topic=configuration-api-gateway-docker-container-externalized-elasticsearch-kibana
+  apigw:
+    image: cp.icr.io/cp/webmethods/api/api-gateway:11.1
+    hostname: apigw
+    ports:
+      - "5555:5555"
+      - "9072:9072"
+    environment:
+      - apigw_elasticsearch_hosts=apigw-es:9200
+      - apigw_kibana_dashboardInstance=http://apigw-kb:5601
+    stop_grace_period: 30s
+
+  apigw-es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    hostname: apigw-es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.monitoring.enabled=false
+
+  apigw-kb:
+    image: docker.elastic.co/kibana/kibana:8.12.2
+    hostname: apigw-kb
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://apigw-es:9200
+      - SERVER_BASEPATH=/apigatewayui/dashboardproxy
+
+  # Microgateway
+  # https://www.ibm.com/docs/en/webmethods-microgateway/11.1.0?topic=provisioning-microgateway-docker-environment-variables
+  mcgw:
+    image: cp.icr.io/cp/webmethods/api/microgateway:11.1
+    hostname: mcgw
+    ports:
+      - "4485:4485"
+    environment:
+      - mcgw_ports_http=4485
+      - mcgw_api_gateway_url=apigw:5555
+      - mcgw_api_gateway_user=Administrator
+      - mcgw_api_gateway_password=manage
+      - mcgw_downloads_apis=petstore
+
+  # Developer Portal
+  # https://www.ibm.com/docs/en/wdp/11.1.0?topic=started-installing-stand-alone-developer-portal-using-docker
+  devportal:
+    image: cp.icr.io/cp/webmethods/api/ibm-webmethods-developer-portal:11.1
+    hostname: devportal
+    ports:
+      - "18101:8080"
+      - "18102:8443"
+    environment:
+      - SPRING_ELASTICSEARCH_URIS=http://devportal-es:9200
+
+  devportal-es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    hostname: devportal-es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.monitoring.enabled=false
+
 volumes:
   um-data:
