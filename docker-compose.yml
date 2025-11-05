@@ -1,6 +1,6 @@
 services:
   # Integration Server
-  # https://www.ibm.com/docs/en/wm-integration-server/11.1.0?topic=guide-environment-variables
+  # https://www.ibm.com/docs/en/webmethods-integration/wm-integration-server/11.1.0?topic=ev-environment-variables-defined-in-integration-server-microservices-runtime
   is:
     # image: cp.icr.io/cp/webmethods/integration/webmethods-microservicesruntime:11.1
     # image: ibmwebmethods.azurecr.io/webmethods-microservicesruntime:11.1
@@ -25,7 +25,7 @@ services:
     stop_grace_period: 30s
 
   # Universal Messaging
-  # https://www.ibm.com/docs/en/wm-universal-messaging/11.1.0?topic=containers-running-universal-messaging
+  # https://www.ibm.com/docs/en/webmethods-integration/wm-universal-messaging/11.1.0?topic=containers-running-universal-messaging
   um:
     # image: cp.icr.io/cp/webmethods/universalmessaging/universalmessaging-server:11.1
     image: ibmwebmethods.azurecr.io/universalmessaging-server:11.1
@@ -40,9 +40,11 @@ services:
     stop_grace_period: 30s
 
   # API Gateway
-  # https://www.ibm.com/docs/en/wm-api-gateway/11.1.0?topic=configuration-api-gateway-docker-container-externalized-elasticsearch-kibana
+  # https://www.ibm.com/docs/en/wam/wm-api-gateway/11.1.0?topic=deployment-how-install-webmethods-api-gateway-using-docker
+  # https://www.ibm.com/docs/en/wam/wm-api-gateway/11.1.0?topic=configurations-using-externalized-configuration-files
   apigw:
-    image: cp.icr.io/cp/webmethods/api/api-gateway:11.1
+    # image: cp.icr.io/cp/webmethods/api/api-gateway:11.1
+    image: ibmwebmethods.azurecr.io/apigateway-minimal:11.1
     hostname: apigw
     ports:
       - "5555:5555"
@@ -50,29 +52,35 @@ services:
     environment:
       - apigw_elasticsearch_hosts=apigw-es:9200
       - apigw_kibana_dashboardInstance=http://apigw-kb:5601
+      - apigw_wrapper_java_initmemory=512
+      - apigw_wrapper_java_maxmemory=512
     stop_grace_period: 30s
 
   apigw-es:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.3
     hostname: apigw-es
     environment:
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - xpack.monitoring.enabled=false
+    volumes:
+      - apigw-es-data:/usr/share/elasticsearch/data
 
   apigw-kb:
-    image: docker.elastic.co/kibana/kibana:8.12.2
+    image: docker.elastic.co/kibana/kibana:8.17.3
     hostname: apigw-kb
     ports:
       - "5601:5601"
     environment:
       - ELASTICSEARCH_HOSTS=http://apigw-es:9200
       - SERVER_BASEPATH=/apigatewayui/dashboardproxy
+      - TELEMETRY_OPTIN=false
 
   # Microgateway
-  # https://www.ibm.com/docs/en/webmethods-microgateway/11.1.0?topic=provisioning-microgateway-docker-environment-variables
+  # https://www.ibm.com/docs/en/wam/webmethods-microgateway/11.1.0?topic=provisioning-microgateway-docker-environment-variables
   mcgw:
-    image: cp.icr.io/cp/webmethods/api/microgateway:11.1
+    # image: cp.icr.io/cp/webmethods/api/microgateway:11.1
+    image: ibmwebmethods.azurecr.io/microgateway:11.1
     hostname: mcgw
     ports:
       - "4485:4485"
@@ -84,9 +92,10 @@ services:
       - mcgw_downloads_apis=petstore
 
   # Developer Portal
-  # https://www.ibm.com/docs/en/wdp/11.1.0?topic=started-installing-stand-alone-developer-portal-using-docker
+  # https://www.ibm.com/docs/en/wam/wdp/11.1.0?topic=started-installing-stand-alone-developer-portal-using-docker
   devportal:
-    image: cp.icr.io/cp/webmethods/api/ibm-webmethods-developer-portal:11.1
+    # image: cp.icr.io/cp/webmethods/api/ibm-webmethods-developer-portal:11.1
+    image: ibmwebmethods.azurecr.io/devportal:11.1
     hostname: devportal
     ports:
       - "18101:8080"
@@ -95,12 +104,16 @@ services:
       - SPRING_ELASTICSEARCH_URIS=http://devportal-es:9200
 
   devportal-es:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.3
     hostname: devportal-es
     environment:
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - xpack.monitoring.enabled=false
+    volumes:
+      - devportal-es-data:/usr/share/elasticsearch/data
 
 volumes:
   um-data:
+  apigw-es-data:
+  devportal-es-data:
