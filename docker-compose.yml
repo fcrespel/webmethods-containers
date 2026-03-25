@@ -6,7 +6,7 @@ services:
     # image: ibmwebmethods.azurecr.io/webmethods-microservicesruntime:11.1
     image: webmethods-microservicesruntime:11.1
     build:
-      context: .
+      context: is
       dockerfile: Dockerfile
       args:
         - BASE_IMAGE=ibmwebmethods.azurecr.io/webmethods-microservicesruntime:11.1
@@ -21,7 +21,7 @@ services:
       - SAG_IS_ADMIN_PASSWORD=manage
       - SAG_IS_DEBUG_LEVEL=Info
     volumes:
-      - './application.properties:/opt/softwareag/IntegrationServer/application.properties'
+      - './is/IntegrationServer/application.properties:/opt/softwareag/IntegrationServer/application.properties'
     stop_grace_period: 30s
 
   # Universal Messaging
@@ -47,13 +47,23 @@ services:
     image: ibmwebmethods.azurecr.io/apigateway-minimal:11.1
     hostname: apigw
     ports:
-      - "5555:5555"
+      - "5556:5555"
       - "9072:9072"
     environment:
+      - apigw_aliases_is_connectionTimeout=30
+      - apigw_aliases_is_endPointURI=http://is:5555
+      - apigw_aliases_is_passSecurityHeaders=true
+      - apigw_aliases_is_readTimeout=30
+      - apigw_aliases_is_type=endpoint
       - apigw_elasticsearch_hosts=apigw-es:9200
       - apigw_kibana_dashboardInstance=http://apigw-kb:5601
       - apigw_wrapper_java_initmemory=512
       - apigw_wrapper_java_maxmemory=512
+      - APIGW_UNAUTHENTICATED_HEALTH_CHECK=true
+      - SAG_IS_ADMIN_PASSWORD=manage
+      - SAG_IS_DEBUG_LEVEL=Info
+    volumes:
+      - './apigw/IntegrationServer/application.properties:/opt/softwareag/IntegrationServer/application.properties'
     stop_grace_period: 30s
 
   apigw-es:
@@ -104,14 +114,14 @@ services:
       - SPRING_ELASTICSEARCH_URIS=http://devportal-es:9200
 
   devportal-es:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.3
+    image: opensearchproject/opensearch:2.19.1
     hostname: devportal-es
     environment:
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - DISABLE_SECURITY_PLUGIN=true
       - discovery.type=single-node
-      - xpack.security.enabled=false
     volumes:
-      - devportal-es-data:/usr/share/elasticsearch/data
+      - devportal-es-data:/usr/share/opensearch/data
 
 volumes:
   um-data:

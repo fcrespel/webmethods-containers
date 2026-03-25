@@ -7,7 +7,7 @@ ARG WPM_TOKEN
 ARG WPM_SAG_SERVER=https://packages.webmethods.io
 
 # Install packages with wpm
-RUN for PKG in "WmCloudStreams:v11.1.0" "WmJDBCAdapter:v10.3.10.21" "WmKafkaAdapter:v9.6.9.16"; do \
+RUN for PKG in "WmCloudStreams:v11.1.0" "WmJDBCAdapter:v10.3.10.21" "WmKafkaAdapter:v9.6.9.16" "WmSAP:v10.1.4.14"; do \
         ${SAG_HOME}/wpm/bin/wpm install -d ${SAG_HOME}/IntegrationServer -ws ${WPM_SAG_SERVER} -wr licensed -j ${WPM_TOKEN} ${PKG}; \
     done &&\
     for PKG in "WmGoogleCloudStorageProvider:v10.5.0" "WmStreaming:latest"; do \
@@ -53,3 +53,6 @@ RUN mkdir -p "${SAG_HOME}/IntegrationServer/packages/WmKafkaAdapter/code/jars/st
         "io/confluent/kafka-schema-serializer/7.9.4/kafka-schema-serializer-7.9.4.jar"; do \
         curl -sSLf --retry 5 "https://packages.confluent.io/maven/${JAR}" -o "${SAG_HOME}/IntegrationServer/packages/WmKafkaAdapter/code/jars/static/$(basename ${JAR})"; \
     done
+
+# Add overlay
+COPY --chown=1724:1724 IntegrationServer/ ${SAG_HOME}/IntegrationServer/
