@@ -2,7 +2,6 @@ services:
   # Integration Server
   # https://www.ibm.com/docs/en/webmethods-integration/wm-integration-server/11.1.0?topic=ev-environment-variables-defined-in-integration-server-microservices-runtime
   is:
-    # image: cp.icr.io/cp/webmethods/integration/webmethods-microservicesruntime:11.1
     # image: ibmwebmethods.azurecr.io/webmethods-microservicesruntime:11.1
     image: webmethods-microservicesruntime:11.1
     build:
@@ -27,7 +26,6 @@ services:
   # Universal Messaging
   # https://www.ibm.com/docs/en/webmethods-integration/wm-universal-messaging/11.1.0?topic=containers-running-universal-messaging
   um:
-    # image: cp.icr.io/cp/webmethods/universalmessaging/universalmessaging-server:11.1
     image: ibmwebmethods.azurecr.io/universalmessaging-server:11.1
     hostname: um
     ports:
@@ -43,7 +41,6 @@ services:
   # https://www.ibm.com/docs/en/wam/wm-api-gateway/11.1.0?topic=deployment-how-install-webmethods-api-gateway-using-docker
   # https://www.ibm.com/docs/en/wam/wm-api-gateway/11.1.0?topic=configurations-using-externalized-configuration-files
   apigw:
-    # image: cp.icr.io/cp/webmethods/api/api-gateway:11.1
     image: ibmwebmethods.azurecr.io/apigateway-minimal:11.1
     hostname: apigw
     ports:
@@ -89,7 +86,6 @@ services:
   # Microgateway
   # https://www.ibm.com/docs/en/wam/webmethods-microgateway/11.1.0?topic=provisioning-microgateway-docker-environment-variables
   mcgw:
-    # image: cp.icr.io/cp/webmethods/api/microgateway:11.1
     image: ibmwebmethods.azurecr.io/microgateway:11.1
     hostname: mcgw
     ports:
@@ -104,7 +100,6 @@ services:
   # Developer Portal
   # https://www.ibm.com/docs/en/wam/wdp/11.1.0?topic=started-installing-stand-alone-developer-portal-using-docker
   devportal:
-    # image: cp.icr.io/cp/webmethods/api/ibm-webmethods-developer-portal:11.1
     image: ibmwebmethods.azurecr.io/devportal:11.1
     hostname: devportal
     ports:
@@ -123,7 +118,46 @@ services:
     volumes:
       - devportal-es-data:/usr/share/opensearch/data
 
+  # Active Transfer
+  # https://www.ibm.com/docs/en/webmethods-activetransfer/11.1.0?topic=server-using-activetransfer-docker
+  mft:
+    image: ibmwebmethods.azurecr.io/webmethods-activetransfer:11.1
+    hostname: mft
+    ports:
+      - "5557:5555"
+      - "5558:5558"
+      - "2222:2222"
+    environment:
+      - JAVA_MIN_MEM=512m
+      - JAVA_MAX_MEM=512m
+      - SAG_IS_ADMIN_PASSWORD=manage
+      - SAG_IS_DEBUG_LEVEL=Info
+    volumes:
+      - ./mft/IntegrationServer/application.properties:/opt/softwareag/IntegrationServer/application.properties
+    stop_grace_period: 30s
+
+  mft-pg:
+    image: postgres:15
+    hostname: mft-pg
+    environment:
+      - POSTGRES_USER=mft
+      - POSTGRES_PASSWORD=mft
+      - POSTGRES_DB=mft
+    volumes:
+      - mft-pg-data:/var/lib/postgresql/data
+
+  mft-dcc:
+    image: ibmwebmethods.azurecr.io/webmethods-activetransfer-dcc:11.1
+    hostname: mft-dcc
+    environment:
+      - DB_ACTION=create
+    volumes:
+      - ./mft/db:/opt/softwareag/common/auth/db:ro
+    profiles:
+      - mft-dcc
+
 volumes:
   um-data:
   apigw-es-data:
   devportal-es-data:
+  mft-pg-data:

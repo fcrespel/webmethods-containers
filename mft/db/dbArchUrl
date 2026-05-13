@@ -1,0 +1,1 @@
+jdbc:wm:postgresql://mft-pg:5432;databaseName=mft
