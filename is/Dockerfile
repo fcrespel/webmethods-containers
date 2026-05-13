@@ -10,18 +10,20 @@ ARG WPM_SAG_SERVER=https://packages.webmethods.io
 RUN for PKG in "WmCloudStreams:v11.1.0" "WmJDBCAdapter:v10.3.10.21" "WmKafkaAdapter:v9.6.9.16" "WmSAP:v10.1.4.14"; do \
         ${SAG_HOME}/wpm/bin/wpm install -d ${SAG_HOME}/IntegrationServer -ws ${WPM_SAG_SERVER} -wr licensed -j ${WPM_TOKEN} ${PKG}; \
     done &&\
-    for PKG in "WmGoogleCloudStorageProvider:v10.5.0" "WmStreaming:latest"; do \
+    for PKG in "WmGoogleCloudStorageProvider:v10.5.0" "WmStreaming:v11.1.0"; do \
         ${SAG_HOME}/wpm/bin/wpm install -d ${SAG_HOME}/IntegrationServer -ws ${WPM_SAG_SERVER} -wr supported -j ${WPM_TOKEN} ${PKG}; \
     done
 
 # Add JDBC drivers
-RUN for JAR in \
+RUN chmod ug+w "${SAG_HOME}/IntegrationServer/lib/jars/custom" &&\
+    for JAR in \
         "com/microsoft/sqlserver/mssql-jdbc/13.2.1.jre11/mssql-jdbc-13.2.1.jre11.jar" \
         "com/oracle/database/jdbc/ojdbc11/23.9.0.25.07/ojdbc11-23.9.0.25.07.jar" \
         "com/mysql/mysql-connector-j/9.5.0/mysql-connector-j-9.5.0.jar" \
         "org/postgresql/postgresql/42.7.8/postgresql-42.7.8.jar"; do \
         curl -sSLf --retry 5 "https://repo1.maven.org/maven2/${JAR}" -o "${SAG_HOME}/IntegrationServer/lib/jars/custom/$(basename ${JAR})"; \
-    done
+    done &&\
+    chmod ug-w "${SAG_HOME}/IntegrationServer/lib/jars/custom"
 
 # Add Kafka libraries
 RUN mkdir -p "${SAG_HOME}/IntegrationServer/packages/WmKafkaAdapter/code/jars/static" &&\
