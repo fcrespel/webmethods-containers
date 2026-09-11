@@ -7,10 +7,10 @@ ARG WPM_TOKEN
 ARG WPM_SAG_SERVER=https://packages.webmethods.io
 
 # Install packages with wpm
-RUN for PKG in "WmCloudStreams:v11.1.0" "WmJDBCAdapter:v10.3.10.21" "WmKafkaAdapter:v9.6.9.16" "WmSAP:v10.1.4.14"; do \
+RUN for PKG in "WmCloudStreams:v11.1.0" "WmJDBCAdapter:v10.3.10.25" "WmKafkaAdapter:v9.6.11.20" "WmSAP:v10.1.5.16"; do \
         ${SAG_HOME}/wpm/bin/wpm install -d ${SAG_HOME}/IntegrationServer -ws ${WPM_SAG_SERVER} -wr licensed -j ${WPM_TOKEN} ${PKG}; \
     done &&\
-    for PKG in "WmGoogleCloudStorageProvider:v10.5.0" "WmStreaming:v11.1.0"; do \
+    for PKG in "WmGoogleCloudStorageProvider:v10.7.0" "WmStreaming:v11.1.0.2"; do \
         ${SAG_HOME}/wpm/bin/wpm install -d ${SAG_HOME}/IntegrationServer -ws ${WPM_SAG_SERVER} -wr supported -j ${WPM_TOKEN} ${PKG}; \
     done
 

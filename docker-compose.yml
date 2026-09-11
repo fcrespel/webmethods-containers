@@ -19,6 +19,8 @@ services:
       - JAVA_MAX_MEM=512m
       - SAG_IS_ADMIN_PASSWORD=manage
       - SAG_IS_DEBUG_LEVEL=Info
+      - WM_IS_INFO_NAME=Demo
+      - WM_IS_INFO_TYPE=DEV
     volumes:
       - './is/IntegrationServer/application.properties:/opt/softwareag/IntegrationServer/application.properties'
     stop_grace_period: 30s
@@ -46,6 +48,7 @@ services:
     ports:
       - "5556:5555"
       - "9072:9072"
+      - "9073:9073"
     environment:
       - apigw_aliases_is_connectionTimeout=30
       - apigw_aliases_is_endPointURI=http://is:5555
@@ -54,6 +57,8 @@ services:
       - apigw_aliases_is_type=endpoint
       - apigw_elasticsearch_hosts=apigw-es:9200
       - apigw_kibana_dashboardInstance=http://apigw-kb:5601
+      - apigw_ui_https_keystorePass=manage
+      - apigw_ui_https_keyPass=manage
       - apigw_wrapper_java_initmemory=512
       - apigw_wrapper_java_maxmemory=512
       - APIGW_UNAUTHENTICATED_HEALTH_CHECK=true
@@ -70,6 +75,9 @@ services:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - discovery.type=single-node
       - xpack.security.enabled=false
+      - cluster.routing.allocation.disk.watermark.low=2gb
+      - cluster.routing.allocation.disk.watermark.high=1gb
+      - cluster.routing.allocation.disk.watermark.flood_stage=512mb
     volumes:
       - apigw-es-data:/usr/share/elasticsearch/data
 
@@ -115,6 +123,9 @@ services:
       - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
       - DISABLE_SECURITY_PLUGIN=true
       - discovery.type=single-node
+      - cluster.routing.allocation.disk.watermark.low=2gb
+      - cluster.routing.allocation.disk.watermark.high=1gb
+      - cluster.routing.allocation.disk.watermark.flood_stage=512mb
     volumes:
       - devportal-es-data:/usr/share/opensearch/data
 
