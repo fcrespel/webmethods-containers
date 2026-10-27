@@ -1,28 +1,35 @@
 services:
   # Integration Server
   # https://www.ibm.com/docs/en/webmethods-integration/wm-integration-server/11.1.0?topic=ev-environment-variables-defined-in-integration-server-microservices-runtime
-  is:
+  msr:
     # image: ibmwebmethods.azurecr.io/webmethods-microservicesruntime:11.1
     image: webmethods-microservicesruntime:11.1
     build:
-      context: is
+      context: msr
       dockerfile: Dockerfile
       args:
         - BASE_IMAGE=ibmwebmethods.azurecr.io/webmethods-microservicesruntime:11.1
+        - WPM_PACKAGES=licensed:WmCloudStreams:v11.1.0 licensed:WmJDBCAdapter:v10.3.10.25 licensed:WmKafkaAdapter:v9.6.11.20 licensed:WmSAP:v10.1.5.16 supported:WmE2EMIntegrationAgent:v11.1.0.12.225 supported:WmGoogleCloudStorageProvider:v10.7.0 supported:WmStreaming:v11.1.0.2
         - WPM_TOKEN
-    hostname: is
+    hostname: msr
     ports:
       - "5555:5555"
       - "5543:5543"
     environment:
+      - JAVA_CUSTOM_OPTS=-javaagent:./packages/wme2emintegrationagent/resources/agent/uha-apm-agent.jar=logging.dir=./logs/ -Xbootclasspath/a:./packages/wme2emintegrationagent/resources/agent/uha-apm-agent.jar
       - JAVA_MIN_MEM=512m
       - JAVA_MAX_MEM=512m
       - SAG_IS_ADMIN_PASSWORD=manage
       - SAG_IS_DEBUG_LEVEL=Info
-      - WM_IS_INFO_NAME=Demo
+      - SAG_IS_EDGE_CLOUD_ALIAS=EdgeRuntime_${WM_IS_EDGE_CLOUD_ALIAS}
+      - SW_AGENT_TRACE_TRANSFER_INTERVAL=1000
+      - WM_IS_CLOUD_REGISTER_TOKEN
+      - WM_IS_CLOUD_REGISTER_URL
+      - WM_IS_EDGE_CLOUD_ALIAS
+      - WM_IS_INFO_NAME=Sample Microservices Runtime
       - WM_IS_INFO_TYPE=DEV
     volumes:
-      - './is/IntegrationServer/application.properties:/opt/softwareag/IntegrationServer/application.properties'
+      - './msr/IntegrationServer/application.properties:/opt/softwareag/IntegrationServer/application.properties'
     stop_grace_period: 30s
 
   # Universal Messaging
