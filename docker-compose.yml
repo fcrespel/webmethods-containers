@@ -1,22 +1,22 @@
 services:
   # Integration Server
-  # https://www.ibm.com/docs/en/webmethods-integration/wm-integration-server/11.1.0?topic=ev-environment-variables-defined-in-integration-server-microservices-runtime
+  # https://www.ibm.com/docs/en/webmethods-integration/wm-integration-server/12.1.0?topic=guide-environment-variables
   msr:
-    # image: ibmwebmethods.azurecr.io/webmethods-microservicesruntime:11.1
-    image: webmethods-microservicesruntime:11.1
+    # image: ibmwebmethods.azurecr.io/webmethods-microservicesruntime:12.1
+    image: webmethods-microservicesruntime:12.1
     build:
       context: msr
       dockerfile: Dockerfile
       args:
-        - BASE_IMAGE=ibmwebmethods.azurecr.io/webmethods-microservicesruntime:11.1
-        - WPM_PACKAGES=licensed:WmCloudStreams:v11.1.0 licensed:WmJDBCAdapter:v10.3.10.25 licensed:WmKafkaAdapter:v9.6.11.20 licensed:WmSAP:v10.1.5.16 supported:WmE2EMIntegrationAgent:v11.1.0.12.225 supported:WmGoogleCloudStorageProvider:v10.7.0 supported:WmStreaming:v11.1.0.2
+        - BASE_IMAGE=ibmwebmethods.azurecr.io/webmethods-microservicesruntime:12.1
+        - WPM_PACKAGES=licensed:WmCloudStreams:v12.1 licensed:WmJDBCAdapter:v10.3.10.25 licensed:WmKafkaAdapter:v9.6.11.20 licensed:WmSAP:v10.1.5.16 supported:WmE2EMIntegrationAgent:v12.1.0.1.12 supported:WmGoogleCloudStorageProvider:v12.0.0 supported:WmMCPServer:v12.1.0.0 supported:WmStreaming:v12.1.0.1
         - WPM_TOKEN
     hostname: msr
     ports:
       - "5555:5555"
       - "5543:5543"
     environment:
-      - JAVA_CUSTOM_OPTS=-javaagent:./packages/wme2emintegrationagent/resources/agent/uha-apm-agent.jar=logging.dir=./logs/ -Xbootclasspath/a:./packages/wme2emintegrationagent/resources/agent/uha-apm-agent.jar
+      - JAVA_CUSTOM_OPTS=-javaagent:./packages/WmE2EMIntegrationAgent/resources/agent/uha-apm-agent.jar=logging.dir=./logs/ -Xbootclasspath/a:./packages/WmE2EMIntegrationAgent/resources/agent/uha-apm-agent.jar
       - JAVA_MIN_MEM=512m
       - JAVA_MAX_MEM=512m
       - SAG_IS_ADMIN_PASSWORD=manage
@@ -32,10 +32,29 @@ services:
       - './msr/IntegrationServer/application.properties:/opt/softwareag/IntegrationServer/application.properties'
     stop_grace_period: 30s
 
+  # Edge Runtime
+  # https://www.ibm.com/docs/en/webmethods-integration/wm-integration-server/12.1.0?topic=guide-environment-variables
+  # https://www.ibm.com/docs/en/wisolution/wm-integration/11.2.4?topic=runtimes-registering-edge
+  ert:
+    image: iwhicr.azurecr.io/webmethods-edge-runtime:12.0.7.0
+    hostname: ert
+    ports:
+      - "6555:5555"
+      - "6543:5543"
+    environment:
+      - JAVA_MIN_MEM=512m
+      - JAVA_MAX_MEM=512m
+      - SAG_IS_CLOUD_REGISTER_TOKEN
+      - SAG_IS_CLOUD_REGISTER_URL
+      - SAG_IS_EDGE_CLOUD_ALIAS
+      - WM_IS_INFO_NAME=Sample Edge Runtime
+      - WM_IS_INFO_TYPE=DEV
+    stop_grace_period: 30s
+
   # Universal Messaging
-  # https://www.ibm.com/docs/en/webmethods-integration/wm-universal-messaging/11.1.0?topic=containers-running-universal-messaging
+  # https://www.ibm.com/docs/en/webmethods-integration/wm-universal-messaging/12.1.0?topic=containers-running-universal-messaging
   um:
-    image: ibmwebmethods.azurecr.io/universalmessaging-server:11.1
+    image: ibmwebmethods.azurecr.io/universalmessaging-server:12.1
     hostname: um
     ports:
       - "9000:9000"
@@ -137,9 +156,9 @@ services:
       - devportal-es-data:/usr/share/opensearch/data
 
   # Active Transfer
-  # https://www.ibm.com/docs/en/webmethods-activetransfer/11.1.0?topic=server-using-activetransfer-docker
+  # https://www.ibm.com/docs/en/webmethods-activetransfer/12.1.0?topic=server-using-activetransfer-docker
   mft:
-    image: ibmwebmethods.azurecr.io/webmethods-activetransfer:11.1
+    image: ibmwebmethods.azurecr.io/webmethods-activetransfer:12.1
     hostname: mft
     ports:
       - "5557:5555"
@@ -165,7 +184,7 @@ services:
       - mft-pg-data:/var/lib/postgresql/data
 
   mft-dcc:
-    image: ibmwebmethods.azurecr.io/webmethods-activetransfer-dcc:11.1
+    image: ibmwebmethods.azurecr.io/webmethods-activetransfer-dcc:12.1
     hostname: mft-dcc
     environment:
       - DB_ACTION=create

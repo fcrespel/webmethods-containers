@@ -1,6 +1,6 @@
 # webMethods containers samples
 
-This repository contains samples for **IBM webMethods** 11.1 containers. Check other branches for other versions.
+This repository contains samples for **IBM webMethods** 12.1 containers. Check other branches for other versions.
 
 These samples are provided as-is and without warranty or support. They do not constitute part of the IBM webMethods product suite, and are not endorsed by IBM. Users are free to use, fork and modify them, subject to the license agreement.
 
@@ -13,7 +13,7 @@ You will also need an **IBM ID** with access to the products you want to build. 
 - [webMethods Container Registry](https://containers.webmethods.io), to be able to pull the official webMethods container images. Generate a password from your profile and login with the `docker login ibmwebmethods.azurecr.io` command.
 - [webMethods Package Registry](https://packages.webmethods.io), to be able to use webMethods Package Manager (WPM). Generate a token from your profile and set it in the `WPM_TOKEN` environment variable or in a `.env` file in this directory.
 
-If you want to connect Microservices Runtime to a webMethods Cloud tenant, follow the documentation about runtime [registration](https://www.ibm.com/docs/en/wisolution/wm-integration/11.2.4?topic=runtimes-registering-edge).
+If you want to connect Microservices Runtime or Edge Runtime to a webMethods Cloud tenant, follow the documentation about runtime [registration](https://www.ibm.com/docs/en/wisolution/wm-integration/11.2.4?topic=runtimes-registering-edge).
 
 ## Usage
 
@@ -39,6 +39,24 @@ Connect to the Microservices Runtime container at [http://localhost:5555](http:/
 Review the `msr/Dockerfile` file for more details and customization of the build process (e.g. WPM packages and extra JARs).
 
 Configuration variables are defined in the `msr/IntegrationServer/application.properties` file.
+
+### Edge Runtime
+
+Configure the webMethods Cloud registration details in the `.env` file (required):
+
+```
+SAG_IS_CLOUD_REGISTER_TOKEN=<token>
+SAG_IS_CLOUD_REGISTER_URL=https://<tenant>.a-vir-r1.int.ipaas.automation.ibm.com
+SAG_IS_EDGE_CLOUD_ALIAS=EdgeRuntime_<runtime>
+```
+
+Run the following command to start the Edge Runtime container:
+
+```bash
+docker compose up -d ert
+```
+
+Connect to the Edge Runtime container at [http://localhost:6555](http://localhost:6555) and log in with cloud-provided credentials.
 
 ### API Gateway
 
